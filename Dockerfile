@@ -1,3 +1,3 @@
-FROM = termline -jdk 17
-WORKDIR = /ubuntu/home
-copy = 
+FROM : termline -jdk 17
+WORKDIR : /ubuntu/home
+COPY :  
