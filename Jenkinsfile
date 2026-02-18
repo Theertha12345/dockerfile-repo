@@ -6,12 +6,12 @@
      } 
 
    environmet {
-       AWS_REGEN : ap-south-02
-       INSTANCE ID : i-00de154c02a6adb05
-       PRIVATE_IP : 172.31.5.104
+       AWS_REGEN : 'ap-south-02'
+       INSTANCE ID : 'i-00de154c02a6adb05'
+       PRIVATE_IP : '172.31.5.104'
+       EC2_PASS : 'ssh-ec2'
        PATH : /home/ubuntu
-
-
+      
 
 
     stages{
@@ -33,6 +33,10 @@
      stage ('depoly on ec2 server'){
        steps { 
          sh " " "
-             ssh($'PRIVATE_IP')
-
-  
+             ssh($'PRIVATE_IP')&'($EC2_PASS)'
+           'docker run -it myapp container'
+              $PATH
+       }
+     }
+    }
+   }  
