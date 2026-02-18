@@ -17,7 +17,7 @@
     stages{
       stage('checkout'){
         steps { 
-        git origin :' main' 
+        git origin :'main' 
         git-URL : 'https://github.com/Theertha12345/dockerfile-repo.git'
        }
     }
@@ -36,6 +36,7 @@
              ssh($'PRIVATE_IP')&'($EC2_PASS)'
            'docker run -it myapp container'
               $PATH
+        " " "
        }
      }
     }
