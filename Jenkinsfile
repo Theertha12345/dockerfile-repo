@@ -25,19 +25,19 @@
       stage('build') {
         steps {
         sh '' 
-           'docker build -t myapp:tag 0.1'
+           'docker build -t myapp:tag 0.1 .'
          '' 
        }
     }
 
-     stage ('depoly on ec2 server'){
-       steps { 
-         sh " " "
-             ssh($'PRIVATE_IP')&'($EC2_PASS)'
-           'docker run -it myapp container'
-              $PATH
-        " " "
-       }
+     stage('Deploy to EC2') {
+            steps {
+                sshagent([SSH_CREDENTIALS]) {
+
+                    sh """
+                    scp -o StrictHostKeyChecking=no target/*.jar ${EC2_USER}@${EC2_IP}:/home/${EC2_USER}/${APP_NAME}
+                    """
+          }
+        }
      }
-    }
-   }  
+  }  
