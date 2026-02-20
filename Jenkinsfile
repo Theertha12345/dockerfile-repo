@@ -1,43 +1,86 @@
- pipeline
-   agent any {
 
-    tools {
-     maven : maven-3
-     } 
+pipeline {
+    agent any
 
-   environmet {
-       AWS_REGEN : 'ap-south-02'
-       INSTANCE ID : 'i-00de154c02a6adb05'
-       PRIVATE_IP : '172.31.5.104'
-       EC2_PASS : 'ssh-ec2'
-       PATH : /home/ubuntu
-      
-
-
-    stages{
-      stage('checkout'){
-        steps { 
-        git origin :'main' 
-        git-URL : 'https://github.com/Theertha12345/dockerfile-repo.git'
-       }
+    parameters {
+        choice(
+            name: 'BRANCH',
+            choices: ['main', 'develop'],
+            description: 'Select branch to build'
+        )
     }
 
-      stage('build') {
-        steps {
-        sh '' 
-           'docker build -t myapp:tag 0.1 .'
-         '' 
-       }
+    environment {
+        AWS_REGION = "ap-south-1"
+        ECR_REPO   = "123456789012.dkr.ecr.ap-south-1.amazonaws.com/myapp"
+        IMAGE_TAG  = "${1.0.0}"
+        SONAR_ENV  = "sonarqubeServer"
     }
 
-     stage('Deploy to EC2') {
+    stages {
+
+        stage('Checkout') {
             steps {
-                sshagent([SSH_CREDENTIALS]) {
-
-                    sh """
-                    scp -o StrictHostKeyChecking=no target/*.jar ${EC2_USER}@${EC2_IP}:/home/${EC2_USER}/${APP_NAME}
-                    """
-          }
+                git branch: params.BRANCH,
+                    url: 'https://github.com/your-org/my-java-app-ci.git'
+            }
         }
-     }
-  }  
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONAR_ENV}") {
+                    sh """
+                    mvn clean verify sonar:sonar \
+                    -Dsonar.projectKey=myapp \
+                    -Dsonar.login=$SONAR_AUTH_TOKEN
+                    """
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Docker Build (Maven inside Dockerfile)') {
+            steps {
+                sh """
+                aws ecr get-login-password --region $AWS_REGION \
+                | docker login --username AWS --password-stdin $ECR_REPO
+
+                docker build -t myapp:$IMAGE_TAG .
+                docker tag myapp:$IMAGE_TAG $ECR_REPO:$IMAGE_TAG
+                """
+            }
+        }
+
+        stage('Push Image to ECR') {
+            steps {
+                sh "docker push $ECR_REPO:$IMAGE_TAG"
+            }
+        }
+
+        stage('Update GitOps Repo (Trigger Argo CD)') {
+            steps {
+                sh """
+                rm -rf myapp-k8s
+                git clone https://github.com/your-org/myapp-k8s.git
+                cd myapp-k8s
+
+                sed -i 's|image: .*|image: $ECR_REPO:$IMAGE_TAG|' deployment.yaml
+
+                git config user.name "jenkins"
+                git config user.email "jenkins@company.com"
+
+                git add deployment.yaml
+                git commit -m "Deploy image $IMAGE_TAG"
+                git push origin main
+                """
+            }
+        }
+    }
+}
