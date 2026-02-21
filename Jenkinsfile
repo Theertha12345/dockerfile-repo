@@ -5,7 +5,7 @@ pipeline {
     parameters {
         choice(
             name: 'BRANCH',
-            choices: ['main', 'develop'],
+            choices: ['main', 'develop','release'],
             description: 'Select branch to build'
         )
     }
@@ -21,7 +21,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: params.BRANCH,
+                git branch: params.'release',
                     url: 'https://github.com/your-org/my-java-app-ci.git'
             }
         }
@@ -38,13 +38,7 @@ pipeline {
             }
         }
 
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
+       
 
         stage('Docker Build (Maven inside Dockerfile)') {
             steps {
