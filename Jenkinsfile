@@ -4,7 +4,7 @@ pipeline {
     parameters {
         choice(
             name: 'BRANCH',
-            choices: ['main', 'develop','release'],
+            choices: ['main', 'develop', 'release'],
             description: 'Select branch to build'
         )
     }
@@ -32,10 +32,10 @@ pipeline {
                         string(credentialsId: 'jenkins-token1', variable: 'SONAR_TOKEN')
                     ]) {
                         sh """
-                        mvn clean verify sonar:sonar \
-                          -Dsonar.projectKey=${PROJECT_KEY} \
-                          -Dsonar.projectName=${PROJECT_KEY} \
-                          -Dsonar.token=$SONAR_TOKEN
+                            mvn clean verify sonar:sonar \
+                              -Dsonar.projectKey=${PROJECT_KEY} \
+                              -Dsonar.projectName=${PROJECT_KEY} \
+                              -Dsonar.token=$SONAR_TOKEN
                         """
                     }
                 }
@@ -43,26 +43,29 @@ pipeline {
         }
 
         stage('Docker Build & Push to ECR (Maven inside Dockerfile)') {
-    steps {
-        withCredentials([
-            [$class: 'AmazonWebServicesCredentialsBinding',
-             credentialsId: 'aws-creds']
-        ]) {
-            sh """
-                echo "Logging into AWS ECR"
-                aws ecr get-login-password --region $AWS_REGION \
-                | docker login --username AWS --password-stdin $ECR_REPO
+            steps {
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding',
+                     credentialsId: 'aws-creds']
+                ]) {
+                    sh """
+                        echo "Logging into AWS ECR"
+                        aws ecr get-login-password --region $AWS_REGION \
+                        | docker login --username AWS --password-stdin $ECR_REPO
 
-                echo " Building Docker image"
-                docker build -t myapp:$IMAGE_TAG .
+                        echo "Building Docker image"
+                        docker build -t myapp:$IMAGE_TAG .
 
-                echo "Tagging image"
-                docker tag myapp:$IMAGE_TAG $ECR_REPO:$IMAGE_TAG
+                        echo "Tagging image"
+                        docker tag myapp:$IMAGE_TAG $ECR_REPO:$IMAGE_TAG
 
-                echo " Pushing image to ECR"
-                docker push $ECR_REPO:$IMAGE_TAG
-            """
+                        echo "Pushing image to ECR"
+                        docker push $ECR_REPO:$IMAGE_TAG
+                    """
+                }
+            }
         }
-    }
-  }
-}
+
+    } 
+
+} 
