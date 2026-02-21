@@ -20,7 +20,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: params.'release',
+                git branch: params.BRANCH,
                     url: 'https://github.com/Theertha12345/dockerfile-repo.git'
             }
         }
