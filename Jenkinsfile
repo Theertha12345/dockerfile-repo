@@ -42,22 +42,26 @@ pipeline {
             }
         }
 
-        stage('Docker Build (Maven inside Dockerfile)') {
-            steps {
-                sh """
+        stage('Docker Build & Push to ECR (Maven inside Dockerfile)') {
+    steps {
+        withCredentials([
+            [$class: 'AmazonWebServicesCredentialsBinding',
+             credentialsId: 'aws-creds']
+        ]) {
+            sh """
+                echo "Logging into AWS ECR"
                 aws ecr get-login-password --region $AWS_REGION \
                 | docker login --username AWS --password-stdin $ECR_REPO
 
+                echo " Building Docker image"
                 docker build -t myapp:$IMAGE_TAG .
-                docker tag myapp:$IMAGE_TAG $ECR_REPO:$IMAGE_TAG
-                """
-            }
-        }
 
-        stage('Push Image to ECR') {
-            steps {
-                sh "docker push $ECR_REPO:$IMAGE_TAG"
-            }
+                echo "Tagging image"
+                docker tag myapp:$IMAGE_TAG $ECR_REPO:$IMAGE_TAG
+
+                echo " Pushing image to ECR"
+                docker push $ECR_REPO:$IMAGE_TAG
+            """
         }
     }
 }
