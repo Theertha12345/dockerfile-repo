@@ -57,24 +57,5 @@ pipeline {
                 sh "docker push $ECR_REPO:$IMAGE_TAG"
             }
         }
-
-        stage('Update GitOps Repo (Trigger Argo CD)') {
-            steps {
-                sh """
-                rm -rf myapp-k8s
-                git clone https://github.com/your-org/myapp-k8s.git
-                cd myapp-k8s
-
-                sed -i 's|image: .*|image: $ECR_REPO:$IMAGE_TAG|' deployment.yaml
-
-                git config user.name "jenkins"
-                git config user.email "jenkins@company.com"
-
-                git add deployment.yaml
-                git commit -m "Deploy image $IMAGE_TAG"
-                git push origin main
-                """
-            }
-        }
     }
 }
