@@ -29,13 +29,13 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube-Server') {
                     withCredentials([
-                        string(credentialsId: 'jenkins-token', variable: 'SONAR_TOKEN1')
+                        string(credentialsId: 'jenkins-token1', variable: 'SONAR_TOKEN')
                     ]) {
                         sh """
                         mvn clean verify sonar:sonar \
                           -Dsonar.projectKey=${PROJECT_KEY} \
                           -Dsonar.projectName=${PROJECT_KEY} \
-                          -Dsonar.token=$SONAR_TOKEN1
+                          -Dsonar.token=$SONAR_TOKEN
                         """
                     }
                 }
