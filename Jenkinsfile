@@ -14,7 +14,7 @@ pipeline {
         PROJECT_KEY = "my-java-app"
         AWS_REGION = "ap-south-2"
         ECR_REPO   = "692614315837.dkr.ecr.ap-south-2.amazonaws.com/myrepo"
-        IMAGE_TAG  = "${1.0.0}"
+        IMAGE_TAG  = "1.0.0"
     }
 
     stages {
