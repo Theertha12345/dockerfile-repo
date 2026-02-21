@@ -11,14 +11,13 @@ pipeline {
     }
 
     environment {
-        AWS_REGION = "ap-south-1"
-        ECR_REPO   = "123456789012.dkr.ecr.ap-south-1.amazonaws.com/myapp"
+        AWS_REGION = "ap-south-2"
+        ECR_REPO   = "692614315837.dkr.ecr.ap-south-2.amazonaws.com/myrepo"
         IMAGE_TAG  = "${1.0.0}"
         SONAR_ENV  = "sonarqubeServer"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 git branch: params.'release',
