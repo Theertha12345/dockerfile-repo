@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -12,12 +11,13 @@ pipeline {
 
     environment {
         PROJECT_KEY = "my-java-app"
-        AWS_REGION = "ap-south-2"
-        ECR_REPO   = "692614315837.dkr.ecr.ap-south-2.amazonaws.com/myrepo"
-        IMAGE_TAG  = "1.0.0"
+        AWS_REGION  = "ap-south-2"
+        ECR_REPO    = "692614315837.dkr.ecr.ap-south-2.amazonaws.com/myrepo"
+        IMAGE_TAG   = "1.0.0"
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: params.BRANCH,
@@ -27,23 +27,20 @@ pipeline {
 
         stage('Sonar Analysis') {
             steps {
-                'my-java-app' {
-                    withSonarQubeEnv('SonarQube-Server') {
-                        withCredentials([
-                            string(credentialsId: 'jenkins-token1', variable: 'SONAR_TOKEN1')
-                        ]) {
-                            sh '''
-                            mvn clean verify sonar:sonar \
-                              -Dsonar.projectKey=${PROJECT_KEY} \
-                              -Dsonar.projectName=${PROJECT_KEY} \
-                              -Dsonar.token=$SONAR_TOKEN
-                            '''
-                        }
+                withSonarQubeEnv('SonarQube-Server') {
+                    withCredentials([
+                        string(credentialsId: 'jenkins-token1', variable: 'SONAR_TOKEN1')
+                    ]) {
+                        sh """
+                        mvn clean verify sonar:sonar \
+                          -Dsonar.projectKey=${PROJECT_KEY} \
+                          -Dsonar.projectName=${PROJECT_KEY} \
+                          -Dsonar.token=$SONAR_TOKEN1
+                        """
                     }
                 }
             }
         }
-       
 
         stage('Docker Build (Maven inside Dockerfile)') {
             steps {
