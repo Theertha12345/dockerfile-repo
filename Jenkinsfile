@@ -21,7 +21,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: params.'release',
-                    url: 'https://github.com/your-org/my-java-app-ci.git'
+                    url: 'https://github.com/Theertha12345/dockerfile-repo.git'
             }
         }
 
