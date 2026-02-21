@@ -30,7 +30,7 @@ pipeline {
                 'my-java-app' {
                     withSonarQubeEnv('SonarQube-Server') {
                         withCredentials([
-                            string(credentialsId: 'jenkins-token', variable: 'SONAR_TOKEN')
+                            string(credentialsId: 'jenkins-token1', variable: 'SONAR_TOKEN')
                         ]) {
                             sh '''
                             mvn clean verify sonar:sonar \
